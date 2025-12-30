@@ -1402,10 +1402,8 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 20px;
-            min-height: 500px;
+            min-height: 400px;
             position: relative;
-            margin-top: 50px;
-            z-index: 1;
         }
 
         .mindmap-node {
@@ -1771,97 +1769,6 @@
             font-weight: bold;
             color: var(--info-color);
         }
-
-        .workflow-container {
-            background: white;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 20px;
-            min-height: 500px;
-            position: relative;
-            margin-top: 50px;
-            z-index: 1;
-            overflow: auto;
-        }
-
-        .workflow-node {
-            position: absolute;
-            background: var(--primary-color);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: move;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 10;
-            transition: transform 0.2s;
-            font-size: 12px;
-            max-width: 150px;
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .workflow-node:hover {
-            transform: scale(1.05);
-            z-index: 20;
-        }
-
-        .workflow-node.start {
-            background: var(--success-color);
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .workflow-node.end {
-            background: var(--danger-color);
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .workflow-node.pending {
-            background: var(--warning-color);
-        }
-
-        .workflow-node.in-analysis {
-            background: var(--info-color);
-        }
-
-        .workflow-node.completed {
-            background: var(--success-color);
-        }
-
-        .workflow-node.rejected {
-            background: var(--danger-color);
-        }
-
-        .workflow-connection {
-            position: absolute;
-            background: #ccc;
-            z-index: 1;
-            transform-origin: 0 0;
-        }
-
-        .workflow-arrow {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 12px solid #ccc;
-            z-index: 2;
-        }
     </style>
 </head>
 <body>
@@ -2093,8 +2000,8 @@
                     <i class="fas fa-check-circle"></i> Concluídas
                     <span class="badge" id="completedBadge" style="display: none;">0</span>
                 </div>
-                <div class="tab" onclick="switchTab('workflow')">
-                    <i class="fas fa-project-diagram"></i> Workflow Visual
+                <div class="tab" onclick="switchTab('mindmap')">
+                    <i class="fas fa-project-diagram"></i> Mapa Mental
                 </div>
                 <div class="tab" onclick="switchTab('notes')">
                     <i class="fas fa-sticky-note"></i> Anotações
@@ -2478,29 +2385,29 @@
                 </div>
             </div>
 
-            <div id="workflow" class="tab-content">
-                <div class="workflow-container">
+            <div id="mindmap" class="tab-content">
+                <div class="mindmap-container">
                     <div class="card-header">
-                        <h2><i class="fas fa-project-diagram"></i> Workflow Visual de Demandas</h2>
+                        <h2><i class="fas fa-project-diagram"></i> Mapa Mental de Prioridades</h2>
                         <div class="card-actions">
-                            <select id="workflowFilter" onchange="filterWorkflow()">
+                            <select id="mindmapFilter" onchange="filterMindmap()">
                                 <option value="todos">Todas as demandas</option>
                                 <option value="pendente">Pendentes</option>
                                 <option value="finalizado_pendente_aprovacao">Em Análise</option>
                                 <option value="aprovada">Concluídas</option>
                                 <option value="atrasado">Atrasadas</option>
                             </select>
-                            <select id="workflowSort" onchange="sortWorkflow()">
+                            <select id="mindmapSort" onchange="sortMindmap()">
                                 <option value="prioridade">Ordenar por Prioridade</option>
                                 <option value="dataLimite">Ordenar por Data Limite</option>
                                 <option value="categoria">Ordenar por Categoria</option>
                             </select>
-                            <button onclick="resetWorkflow()"><i class="fas fa-undo"></i> Resetar</button>
-                            <button onclick="saveWorkflowLayout()"><i class="fas fa-save"></i> Salvar Layout</button>
+                            <button onclick="resetMindmap()"><i class="fas fa-undo"></i> Resetar</button>
+                            <button onclick="saveMindmapLayout()"><i class="fas fa-save"></i> Salvar Layout</button>
                         </div>
                     </div>
-                    <div id="workflowArea">
-                        <!-- Nós do workflow serão adicionados dinamicamente -->
+                    <div id="mindmapArea">
+                        <!-- Nós do mapa mental serão adicionados dinamicamente -->
                     </div>
                 </div>
             </div>
@@ -2538,6 +2445,20 @@
                         <div class="card-actions">
                             <button onclick="changeRankingPeriod()"><i class="fas fa-calendar"></i> Período</button>
                             <button onclick="exportRanking()" id="exportRankingBtn" style="display: none;"><i class="fas fa-download"></i> Exportar</button>
+                        </div>
+                    </div>
+                    <div class="date-filter-container">
+                        <div class="year-filter">
+                            <label for="rankingYearFilter">Ano:</label>
+                            <select id="rankingYearFilter" onchange="updateRanking()">
+                                <option value="">Todos os anos</option>
+                            </select>
+                        </div>
+                        <div class="month-filter">
+                            <label for="rankingMonthFilter">Mês:</label>
+                            <select id="rankingMonthFilter" onchange="updateRanking()">
+                                <option value="">Todos os meses</option>
+                            </select>
                         </div>
                     </div>
                     <ul class="ranking-list" id="rankingList"></ul>
@@ -2900,7 +2821,7 @@
     let selectedUsers = [];
     let notes = [];
     let feedbacks = [];
-    let workflowNodes = [];
+    let mindmapNodes = [];
     let isRecording = false;
     let mediaRecorder = null;
     let audioChunks = [];
@@ -2947,6 +2868,7 @@
             { month: 'atrasadasMonthFilter', year: 'atrasadasYearFilter' },
             { month: 'aprovadasMonthFilter', year: 'aprovadasYearFilter' },
             { month: 'colabMonthFilter', year: 'colabYearFilter' },
+            { month: 'rankingMonthFilter', year: 'rankingYearFilter' },
             { month: 'notesMonthFilter', year: 'notesYearFilter' }
         ];
         
@@ -3313,7 +3235,7 @@
         inicializarImportacaoJSON();
         carregarAnotacoes();
         carregarFeedbacks();
-        carregarWorkflowLayout();
+        carregarMindmapLayout();
         atualizarDashboard();
         atualizarRanking();
         inicializarGraficos();
@@ -3469,7 +3391,7 @@
         renderizarDemandas();
         renderizarCobranca();
         atualizarBadges();
-        atualizarWorkflow();
+        atualizarMindmap();
     }
 
     // Salvar demanda no servidor
@@ -3857,7 +3779,7 @@
         });
         
         if (!targetTab) {
-            const tabNames = ['dashboard', 'nova', 'pendentes', 'analise', 'atrasadas', 'aprovadas', 'workflow', 'notes', 'ranking', 'pendentes-colaboradores', 'feedback', 'cobranca', 'exportar'];
+            const tabNames = ['dashboard', 'nova', 'pendentes', 'analise', 'atrasadas', 'aprovadas', 'mindmap', 'notes', 'ranking', 'pendentes-colaboradores', 'feedback', 'cobranca', 'exportar'];
             const index = tabNames.indexOf(tabName);
             if (index !== -1) {
                 targetTab = document.querySelectorAll('.tab')[index];
@@ -3889,8 +3811,8 @@
             setTimeout(() => { renderizarCobranca(); }, 100);
         } else if (tabName === 'notes') {
             setTimeout(() => { renderizarAnotacoes(); }, 100);
-        } else if (tabName === 'workflow') {
-            setTimeout(() => { atualizarWorkflow(); }, 100);
+        } else if (tabName === 'mindmap') {
+            setTimeout(() => { atualizarMindmap(); }, 100);
         } else if (tabName === 'dashboard') {
             setTimeout(() => { 
                 atualizarGraficos(); 
@@ -4030,10 +3952,7 @@
                     
                     showNotification('success', 'Demanda Registrada', `Sua demanda "${nomeDemanda}" foi registrada com sucesso!`);
                     
-                    // Recarregar a página após registrar uma nova demanda
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
+                    setTimeout(() => { switchTab('pendentes'); }, 1000);
                 }
             });
         }
@@ -4349,11 +4268,6 @@
                     const corpo = encodeURIComponent(`Prezado Gestor,\n\nA demanda "${demandaResolucaoAtual.nomeDemanda}" foi resolvida por ${demandaResolucaoAtual.nomeFuncionario} e está aguardando sua aprovação.\n\n--- Detalhes da Demanda ---\nNome: ${demandaResolucaoAtual.nomeDemanda}\nTAG: ${demandaResolucaoAtual.tag}\n\n--- Comentários do Funcionário ---\n${comentarios}\n\nPor favor, acesse o sistema para aprovar ou reprovar esta demanda.\n\nAtenciosamente,\nSistema de Gestão de Demandas`);
                     window.open(`mailto:${gestor.email}?subject=${assunto}&body=${corpo}`, '_blank');
                 }
-                
-                // Recarregar a página após salvar a resolução
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
             }
 
         } catch (error) {
@@ -4411,11 +4325,6 @@
 
                 addUserNotification('warning', `Demanda ${actionText}`, `Sua demanda "${demandaReprovacaoAtual.nomeDemanda}" foi ${actionText}.`, { tag: demandaReprovacaoAtual.tag });
             }
-            
-            // Recarregar a página após reprovar
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
         }
 
         demandaReprovacaoAtual = null;
@@ -5093,11 +5002,6 @@
                     
                     addUserNotification('success', 'Demanda Aprovada', `Sua demanda "${demanda.nomeDemanda}" foi aprovada!`, { tag: demanda.tag });
                 }
-                
-                // Recarregar a página após aprovar
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
             }
         }
     }
@@ -5933,15 +5837,15 @@
         reader.readAsText(file);
     }
 
-    // Workflow Visual - Funções atualizadas
-    function atualizarWorkflow() {
-        const workflowArea = document.getElementById('workflowArea');
-        if (!workflowArea) return;
+    // Mapa Mental - Funções atualizadas
+    function atualizarMindmap() {
+        const mindmapArea = document.getElementById('mindmapArea');
+        if (!mindmapArea) return;
 
-        workflowArea.innerHTML = '';
+        mindmapArea.innerHTML = '';
 
-        const filter = document.getElementById('workflowFilter')?.value || 'todos';
-        const sort = document.getElementById('workflowSort')?.value || 'prioridade';
+        const filter = document.getElementById('mindmapFilter')?.value || 'todos';
+        const sort = document.getElementById('mindmapSort')?.value || 'prioridade';
 
         let demandas = getDemandasParaUsuarioLogado().filter(d => 
             d.status !== 'aprovada' && d.status !== 'reprovada'
@@ -5973,182 +5877,123 @@
             return 0;
         });
 
-        // Adicionar nó inicial
-        const startNode = document.createElement('div');
-        startNode.className = 'workflow-node start';
-        startNode.style.left = '50%';
-        startNode.style.top = '20px';
-        startNode.style.transform = 'translateX(-50%)';
-        startNode.innerHTML = '<i class="fas fa-play"></i>';
-        workflowArea.appendChild(startNode);
-
-        // Adicionar nós intermediários (status)
-        const statusNodes = [
-            { status: 'pendente', label: 'Pendente', y: 120 },
-            { status: 'atribuida_pendente_aceitacao', label: 'Atribuída', y: 220 },
-            { status: 'finalizado_pendente_aprovacao', label: 'Em Análise', y: 320 }
-        ];
-
-        statusNodes.forEach(nodeInfo => {
-            const node = document.createElement('div');
-            node.className = `workflow-node ${nodeInfo.status}`;
-            node.style.left = '50%';
-            node.style.top = `${nodeInfo.y}px`;
-            node.style.transform = 'translateX(-50%)';
-            node.innerHTML = nodeInfo.label;
-            workflowArea.appendChild(node);
-        });
-
-        // Adicionar nó final
-        const endNode = document.createElement('div');
-        endNode.className = 'workflow-node end';
-        endNode.style.left = '50%';
-        endNode.style.bottom = '20px';
-        endNode.style.transform = 'translateX(-50%)';
-        endNode.innerHTML = '<i class="fas fa-check"></i>';
-        workflowArea.appendChild(endNode);
+        // Adicionar nó central
+        const centralNode = document.createElement('div');
+        centralNode.className = 'mindmap-node';
+        centralNode.style.left = '50%';
+        centralNode.style.top = '50%';
+        centralNode.style.transform = 'translate(-50%, -50%)';
+        centralNode.innerHTML = '<i class="fas fa-user"></i> Minhas Demandas';
+        mindmapArea.appendChild(centralNode);
 
         // Adicionar nós para cada demanda
-        const demandasPorStatus = {};
-        demandas.forEach(demanda => {
-            if (!demandasPorStatus[demanda.status]) {
-                demandasPorStatus[demanda.status] = [];
-            }
-            demandasPorStatus[demanda.status].push(demanda);
-        });
-
-        // Posicionar as demandas ao lado dos nós de status correspondentes
-        statusNodes.forEach(nodeInfo => {
-            const statusDemandas = demandasPorStatus[nodeInfo.status] || [];
-            const nodeX = workflowArea.offsetWidth / 2;
+        demandas.forEach((demanda, index) => {
+            const node = document.createElement('div');
+            node.className = 'mindmap-node';
             
-            statusDemandas.forEach((demanda, index) => {
-                const demandNode = document.createElement('div');
-                demandNode.className = 'workflow-node';
-                
-                // Definir cor com base no status
-                if (demanda.status === 'pendente') {
-                    demandNode.classList.add('pending');
-                } else if (demanda.status === 'finalizado_pendente_aprovacao') {
-                    demandNode.classList.add('in-analysis');
-                } else if (demanda.status === 'aprovada') {
-                    demandNode.classList.add('completed');
-                }
-                
-                // Posicionar à esquerda ou direita do nó de status
-                const isLeft = index % 2 === 0;
-                const offsetX = isLeft ? -150 : 150;
-                const offsetY = (index - Math.floor(statusDemandas.length / 2)) * 40;
-                
-                demandNode.style.left = `${nodeX + offsetX}px`;
-                demandNode.style.top = `${nodeInfo.y + offsetY}px`;
-                demandNode.innerHTML = `<strong>${demanda.nomeDemanda || demanda.descricao}</strong><br><small>${demanda.prioridade}</small>`;
-                
-                // Adicionar evento de clique para ver detalhes
-                demandNode.addEventListener('click', () => verDetalhes(demanda.id));
-                
-                // Adicionar evento de mouseover para mostrar tooltip
-                demandNode.addEventListener('mouseenter', (e) => showTooltip(e, demanda));
-                demandNode.addEventListener('mouseleave', hideTooltip);
-                
-                // Tornar arrastável
-                makeDraggable(demandNode);
-                
-                // Adicionar ID ao nó para referência
-                demandNode.id = `workflow-node-${demanda.id}`;
-                
-                workflowArea.appendChild(demandNode);
-                
-                // Adicionar linha de conexão
-                setTimeout(() => {
-                    criarLinhaWorkflow(
-                        nodeX, nodeInfo.y,
-                        nodeX + offsetX, nodeInfo.y + offsetY
-                    );
-                }, 100);
-            });
+            // Definir cor com base no status
+            if (demanda.status === 'pendente') {
+                node.classList.add('pending');
+            } else if (demanda.status === 'finalizado_pendente_aprovacao') {
+                node.classList.add('in-analysis');
+            } else if (demanda.status === 'aprovada') {
+                node.classList.add('completed');
+            }
+            
+            // Posicionar em círculo ao redor do nó central
+            const angleCircle = (index / demandas.length) * 2 * Math.PI;
+            const radius = 25; // Reduzido de 30% para 25%
+            
+            // Calcular posição em porcentagem
+            const x = 50 + radius * Math.cos(angleCircle);
+            const y = 50 + radius * Math.sin(angleCircle);
+            
+            node.style.left = `${x}%`;
+            node.style.top = `${y}%`;
+            node.style.transform = 'translate(-50%, -50%)'; // Centralizar o nó
+            node.innerHTML = `<strong>${demanda.nomeDemanda || demanda.descricao}</strong><br><small>${demanda.prioridade}</small>`;
+            
+            // Adicionar evento de clique para ver detalhes
+            node.addEventListener('click', () => verDetalhes(demanda.id));
+            
+            // Adicionar evento de mouseover para mostrar tooltip
+            node.addEventListener('mouseenter', (e) => showTooltip(e, demanda));
+            node.addEventListener('mouseleave', hideTooltip);
+            
+            // Tornar arrastável
+            makeDraggable(node);
+            
+            // Adicionar ID ao nó para referência
+            node.id = `node-${demanda.id}`;
+            
+            mindmapArea.appendChild(node);
         });
 
-        // Adicionar linhas de conexão entre os nós de status
+        // Adicionar linhas de conexão após todos os nós serem criados
         setTimeout(() => {
-            for (let i = 0; i < statusNodes.length - 1; i++) {
-                criarLinhaWorkflow(
-                    workflowArea.offsetWidth / 2, statusNodes[i].y,
-                    workflowArea.offsetWidth / 2, statusNodes[i + 1].y
-                );
-            }
-            
-            // Linha do último nó de status para o nó final
-            const lastStatusNode = statusNodes[statusNodes.length - 1];
-            criarLinhaWorkflow(
-                workflowArea.offsetWidth / 2, lastStatusNode.y,
-                workflowArea.offsetWidth / 2, workflowArea.offsetHeight - 40
-            );
-        }, 100);
+            demandas.forEach((demanda, index) => {
+                const connection = document.createElement('div');
+                connection.className = 'mindmap-connection';
+                
+                // Obter elementos
+                const centralNode = document.querySelector('.mindmap-node:not(.pending):not(.in-analysis):not(.completed)');
+                const node = document.getElementById(`node-${demanda.id}`);
+                
+                if (!centralNode || !node) return;
+                
+                // Calcular posição e rotação da linha
+                const centralRect = centralNode.getBoundingClientRect();
+                const nodeRect = node.getBoundingClientRect();
+                const mindmapRect = mindmapArea.getBoundingClientRect();
+                
+                // Calcular pontos de conexão (centro dos elementos)
+                const x1 = centralRect.left + centralRect.width / 2 - mindmapRect.left;
+                const y1 = centralRect.top + centralRect.height / 2 - mindmapRect.top;
+                const x2 = nodeRect.left + nodeRect.width / 2 - mindmapRect.left;
+                const y2 = nodeRect.top + nodeRect.height / 2 - mindmapRect.top;
+                
+                // Calcular comprimento e ângulo da linha
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const connectionAngle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                // Aplicar estilos à linha
+                connection.style.width = `${length}px`;
+                connection.style.height = '2px';
+                connection.style.left = `${x1}px`;
+                connection.style.top = `${y1}px`;
+                connection.style.transform = `rotate(${connectionAngle}deg)`;
+                connection.style.transformOrigin = '0 0'; // Ponto de rotação no início da linha
+                
+                mindmapArea.appendChild(connection);
+            });
+        }, 100); // Pequeno atraso para garantir que os elementos estejam renderizados
     }
 
-    // Função para criar linha de conexão no workflow
-    function criarLinhaWorkflow(x1, y1, x2, y2) {
-        const workflowArea = document.getElementById('workflowArea');
-        if (!workflowArea) return;
-        
-        const connection = document.createElement('div');
-        connection.className = 'workflow-connection';
-        
-        // Calcular comprimento e ângulo da linha
-        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-        
-        // Aplicar estilos à linha
-        connection.style.width = `${length}px`;
-        connection.style.height = '2px';
-        connection.style.left = `${x1}px`;
-        connection.style.top = `${y1}px`;
-        connection.style.transform = `rotate(${angle}deg)`;
-        connection.style.transformOrigin = '0 0'; // Ponto de rotação no início da linha
-        
-        workflowArea.appendChild(connection);
-        
-        // Adicionar seta no final da linha
-        const arrow = document.createElement('div');
-        arrow.className = 'workflow-arrow';
-        
-        // Calcular posição da seta
-        const arrowX = x2 - 8 * Math.sin(angle * Math.PI / 180);
-        const arrowY = y2 - 8 * Math.cos(angle * Math.PI / 180);
-        
-        arrow.style.left = `${arrowX}px`;
-        arrow.style.top = `${arrowY}px`;
-        arrow.style.transform = `rotate(${angle + 90}deg)`;
-        
-        workflowArea.appendChild(arrow);
+    // Filtrar mapa mental
+    function filterMindmap() {
+        atualizarMindmap();
     }
 
-    // Filtrar workflow
-    function filterWorkflow() {
-        atualizarWorkflow();
+    // Ordenar mapa mental
+    function sortMindmap() {
+        atualizarMindmap();
     }
 
-    // Ordenar workflow
-    function sortWorkflow() {
-        atualizarWorkflow();
+    // Resetar mapa mental
+    function resetMindmap() {
+        atualizarMindmap();
+        showNotification('info', 'Mapa Mental Resetado', 'O layout do mapa mental foi resetado.');
     }
 
-    // Resetar workflow
-    function resetWorkflow() {
-        atualizarWorkflow();
-        showNotification('info', 'Workflow Resetado', 'O layout do workflow foi resetado.');
+    // Salvar layout do mapa mental
+    function saveMindmapLayout() {
+        // Implementar salvamento do layout do mapa mental
+        showNotification('info', 'Layout Salvo', 'O layout do mapa mental foi salvo.');
     }
 
-    // Salvar layout do workflow
-    function saveWorkflowLayout() {
-        // Implementar salvamento do layout do workflow
-        showNotification('info', 'Layout Salvo', 'O layout do workflow foi salvo.');
-    }
-
-    // Carregar layout do workflow
-    function carregarWorkflowLayout() {
-        // Implementar carregamento do layout do workflow
+    // Carregar layout do mapa mental
+    function carregarMindmapLayout() {
+        // Implementar carregamento do layout do mapa mental
     }
 
     // Tornar elemento arrastável
@@ -6393,21 +6238,11 @@
             
             let audioContent = '';
             if (note.audioData) {
-                // Verificar se o áudio está em formato de blob ou base64
-                let audioSrc = note.audioData;
-                if (note.audioData.startsWith('data:audio')) {
-                    // Já está em formato base64, pode usar diretamente
-                    audioSrc = note.audioData;
-                } else if (note.audioBlob) {
-                    // Se temos o blob armazenado, criar uma URL para ele
-                    audioSrc = URL.createObjectURL(note.audioBlob);
-                }
-                
                 audioContent = `
                     <div class="audio-note">
                         <p><i class="fas fa-microphone"></i> Nota de Áudio</p>
                         <audio controls class="audio-player">
-                            <source src="${audioSrc}" type="audio/wav">
+                            <source src="${note.audioData}" type="audio/wav">
                             Seu navegador não suporta áudio.
                         </audio>
                     </div>
@@ -6457,8 +6292,7 @@
             date: new Date().toISOString(),
             createdBy: usuarioLogado.id,
             assignedTo: assignedTo ? parseInt(assignedTo) : null,
-            audioData: audioBlob ? convertBlobToBase64(audioBlob) : null,
-            audioBlob: audioBlob ? audioBlob : null
+            audioData: audioBlob ? URL.createObjectURL(audioBlob) : null
         };
         
         notes.unshift(newNote);
@@ -6484,16 +6318,6 @@
         audioChunks = [];
     }
 
-    // Função para converter blob para base64
-    function convertBlobToBase64(blob) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-            reader.readAsDataURL(blob);
-        });
-    }
-
     function editNote(id) {
         const note = notes.find(n => n.id === id);
         if (!note) return;
@@ -6514,38 +6338,17 @@
             note.color = document.getElementById('noteColor').value;
             note.assignedTo = document.getElementById('noteAssignTo').value ? parseInt(document.getElementById('noteAssignTo').value) : null;
             
-            // Se houver um novo áudio, adicioná-lo
-            if (audioBlob) {
-                convertBlobToBase64(audioBlob).then(base64 => {
-                    note.audioData = base64;
-                    note.audioBlob = audioBlob;
-                    
-                    salvarAnotacoes();
-                    renderizarAnotacoes();
-                    closeModal('noteModal');
-                    
-                    showNotification('success', 'Anotação Atualizada', 'Sua anotação foi atualizada com sucesso.');
-                    
-                    // Limpar dados de áudio
-                    audioBlob = null;
-                    audioChunks = [];
-                }).catch(error => {
-                    console.error('Erro ao converter áudio para base64:', error);
-                    showNotification('error', 'Erro ao Salvar Áudio', 'Não foi possível salvar o áudio.');
-                });
-            } else {
-                salvarAnotacoes();
-                renderizarAnotacoes();
-                closeModal('noteModal');
-                
-                showNotification('success', 'Anotação Atualizada', 'Sua anotação foi atualizada com sucesso.');
-            }
+            salvarAnotacoes();
+            renderizarAnotacoes();
+            closeModal('noteModal');
             
             // Restaurar função original
             form.onsubmit = function(e) {
                 e.preventDefault();
                 salvarAnotacao();
             };
+            
+            showNotification('success', 'Anotação Atualizada', 'Sua anotação foi atualizada com sucesso.');
         };
         
         document.getElementById('noteModal').style.display = 'block';
@@ -6577,10 +6380,11 @@
                 
                 mediaRecorder.onstop = () => {
                     audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
                     
                     // Adicionar o áudio à anotação
                     const audioElement = document.createElement('audio');
-                    audioElement.src = URL.createObjectURL(audioBlob);
+                    audioElement.src = audioUrl;
                     audioElement.controls = true;
                     
                     // Inserir o elemento de áudio após o textarea
@@ -6835,7 +6639,7 @@
     // Adicionar listeners para os novos filtros de mês e ano
     document.addEventListener('DOMContentLoaded', () => {
         // Adicionar listeners para os filtros de mês que já existem
-        ['pendentesMonthFilter', 'analiseMonthFilter', 'atrasadasMonthFilter', 'aprovadasMonthFilter', 'colabMonthFilter', 'notesMonthFilter'].forEach(id => {
+        ['pendentesMonthFilter', 'analiseMonthFilter', 'atrasadasMonthFilter', 'aprovadasMonthFilter', 'colabMonthFilter', 'rankingMonthFilter', 'notesMonthFilter'].forEach(id => {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener('change', () => {
@@ -6850,6 +6654,8 @@
                         filterAprovadas();
                     } else if (id.includes('colab')) {
                         filterColabDemandas();
+                    } else if (id.includes('ranking')) {
+                        updateRanking();
                     } else if (id.includes('notes')) {
                         filterNotes();
                     }
@@ -6858,7 +6664,7 @@
         });
 
         // Adicionar listeners para os novos filtros de ano
-        ['pendentesYearFilter', 'analiseYearFilter', 'atrasadasYearFilter', 'aprovadasYearFilter', 'colabYearFilter', 'notesYearFilter'].forEach(id => {
+        ['pendentesYearFilter', 'analiseYearFilter', 'atrasadasYearFilter', 'aprovadasYearFilter', 'colabYearFilter', 'rankingYearFilter', 'notesYearFilter'].forEach(id => {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener('change', () => {
@@ -6873,6 +6679,8 @@
                         filterAprovadas();
                     } else if (id.includes('colab')) {
                         filterColabDemandas();
+                    } else if (id.includes('ranking')) {
+                        updateRanking();
                     } else if (id.includes('notes')) {
                         filterNotes();
                     }
@@ -6972,6 +6780,15 @@
             document.body.removeChild(a);
             showNotification('success', 'Gráfico Baixado', `O gráfico de ${chartType} foi baixado.`);
         }
+    }
+
+    // Função para atualizar automaticamente após alterações
+    function atualizarAposAlteracao() {
+        // Pequeno delay para garantir que os dados foram salvos
+        setTimeout(() => {
+            atualizarInterface();
+            showNotification('success', 'Atualizado', 'A interface foi atualizada automaticamente.');
+        }, 500);
     }
 </script>
 

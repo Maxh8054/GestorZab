@@ -1,0 +1,23 @@
+{
+  "name": "portal-gestor-demandas",
+  "version": "1.0.0",
+  "description": "Sistema Corporativo de Gestão de Demandas",
+  "main": "server.js",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "author": "Maxh8054",
+  "license": "ISC"
+}

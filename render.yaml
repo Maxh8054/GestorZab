@@ -1,9 +1,8 @@
 services:
   - type: web
-    name: portal-gestor-demandas
+    name: portal-gestor
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: node server.js  # Corrigido: removido "src/"
     healthCheckPath: /health
-    autoDeploy: true

@@ -1452,6 +1452,10 @@
             background: var(--success-color);
         }
 
+        .mindmap-node.overdue {
+            background: var(--overdue-color);
+        }
+
         .mindmap-connection {
             position: absolute;
             background: #ccc;
@@ -1919,11 +1923,6 @@
             </div>
         </header>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Pesquisar demandas, funcionários, categorias..." id="globalSearch">
-            <i class="fas fa-search"></i>
-        </div>
-
         <main>
             <div class="dashboard">
                 <div class="stat-card" onclick="drillDown('total')">
@@ -2255,10 +2254,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-clock"></i> Minhas Demandas Pendentes</h2>
-                        <div class="search-bar" style="width: 300px;">
-                            <input type="text" placeholder="Pesquisar por nome ou TAG..." id="pendentesSearch">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="card-actions">
                             <select id="pendentesFilter" onchange="filterPendentes()">
                                 <option value="todos">Todos</option>
@@ -2290,10 +2285,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-search"></i> Demandas em Análise</h2>
-                        <div class="search-bar" style="width: 300px;">
-                            <input type="text" placeholder="Pesquisar por nome ou TAG..." id="analiseSearch">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="card-actions">
                             <select id="analiseFilter" onchange="filterAnalise()">
                                 <option value="todos">Todos</option>
@@ -2323,10 +2314,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-exclamation-triangle"></i> Demandas Atrasadas</h2>
-                        <div class="search-bar" style="width: 300px;">
-                            <input type="text" placeholder="Pesquisar por nome ou TAG..." id="atrasadasSearch">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="card-actions" id="gestorActions2" style="display: none;">
                             <button onclick="reassignSelectedOverdue()"><i class="fas fa-user-plus"></i> Reatribuir</button>
                             <button onclick="extendSelectedDeadlines()"><i class="fas fa-calendar-plus"></i> Estender Prazos</button>
@@ -2359,10 +2346,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-check-circle"></i> Minhas Demandas Concluídas</h2>
-                        <div class="search-bar" style="width: 300px;">
-                            <input type="text" placeholder="Pesquisar por nome ou TAG..." id="aprovadasSearch">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="card-actions" id="gestorActions3" style="display: none;">
                             <button onclick="exportCompleted()"><i class="fas fa-download"></i> Exportar Concluídas</button>
                         </div>
@@ -2469,10 +2452,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-users"></i> Demandas dos Colaboradores</h2>
-                        <div class="search-bar" style="width: 300px;">
-                            <input type="text" placeholder="Pesquisar por nome ou TAG..." id="colabSearch">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="card-actions">
                             <select id="colabFilter" onchange="filterColabDemandas()">
                                 <option value="todos">Todos</option>
@@ -2483,6 +2462,11 @@
                             </select>
                             <select id="colabFuncFilter" onchange="filterColabDemandas()">
                                 <option value="todos">Todos os Funcionários</option>
+                            </select>
+                            <select id="colabLocalFilter" onchange="filterColabDemandas()">
+                                <option value="todos">Todos os Locais</option>
+                                <option value="Lundin">Lundin</option>
+                                <option value="R&D">R&D</option>
                             </select>
                             <div class="date-filter-container">
                                 <div class="year-filter">
@@ -3241,7 +3225,6 @@
         inicializarGraficos();
         
         timerInterval = setInterval(atualizarTemposRestantes, 1000);
-        inicializarNotificacoesTempoReal();
         verificarLembretes();
         
         gerarNotificacoesAoLogar();
@@ -3261,7 +3244,7 @@
 
     // Carregar funcionários nos selects
     function carregarFuncionariosNosSelect() {
-        const selects = ['filtroFuncionario', 'cobrancaFuncionario', 'colabFuncFilter', 'feedbackFuncFilter', 'feedbackFuncSelect', 'reassignTo', 'noteAssignTo'];
+        const selects = ['filtroFuncionario', 'cobrancaFuncionario', 'colabFuncFilter', 'colabLocalFilter', 'feedbackFuncFilter', 'feedbackFuncSelect', 'reassignTo', 'noteAssignTo'];
         
         selects.forEach(selectId => {
             const select = document.getElementById(selectId);
@@ -3274,6 +3257,13 @@
                 } else if (selectId === 'cobrancaFuncionario') {
                     const defaultOption = new Option('Todos os Funcionários com Demandas Atrasadas', 'todos');
                     select.add(defaultOption);
+                } else if (selectId === 'colabLocalFilter') {
+                    const defaultOption = new Option('Todos os Locais', 'todos');
+                    select.add(defaultOption);
+                    const optionLundin = new Option('Lundin', 'Lundin');
+                    select.add(optionLundin);
+                    const optionRD = new Option('R&D', 'R&D');
+                    select.add(optionRD);
                 } else if (selectId === 'feedbackFuncSelect' || selectId === 'reassignTo') {
                     const defaultOption = new Option('Selecione um funcionário', '');
                     select.add(defaultOption);
@@ -4007,48 +3997,6 @@
             anexosCriacaoInput.addEventListener('change', atualizarListaAnexosCriacao);
         }
         
-        const searchInput = document.getElementById('globalSearch');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-            });
-        }
-
-        const pendentesSearch = document.getElementById('pendentesSearch');
-        if (pendentesSearch) {
-            pendentesSearch.addEventListener('input', (e) => {
-                filterPendentes();
-            });
-        }
-
-        const analiseSearch = document.getElementById('analiseSearch');
-        if (analiseSearch) {
-            analiseSearch.addEventListener('input', (e) => {
-                filterAnalise();
-            });
-        }
-
-        const atrasadasSearch = document.getElementById('atrasadasSearch');
-        if (atrasadasSearch) {
-            atrasadasSearch.addEventListener('input', (e) => {
-                renderizarAtrasadas();
-            });
-        }
-
-        const aprovadasSearch = document.getElementById('aprovadasSearch');
-        if (aprovadasSearch) {
-            aprovadasSearch.addEventListener('input', (e) => {
-                renderizarAprovadas();
-            });
-        }
-
-        const colabSearch = document.getElementById('colabSearch');
-        if (colabSearch) {
-            colabSearch.addEventListener('input', (e) => {
-                filterColabDemandas();
-            });
-        }
-        
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.multi-select-container') && !e.target.closest('.category-search')) {
                 document.querySelectorAll('.multi-select-dropdown, .category-dropdown').forEach(dropdown => {
@@ -4345,7 +4293,6 @@
     // Renderizar demandas
     function renderizarDemandas() {
         const demandasDoUsuario = getDemandasParaUsuarioLogado();
-        const searchTerm = document.getElementById('pendentesSearch')?.value.toLowerCase() || '';
         const statusFilter = document.getElementById('pendentesFilter')?.value || 'todos';
         const monthFilter = document.getElementById('pendentesMonthFilter')?.value || '';
         const yearFilter = document.getElementById('pendentesYearFilter')?.value || '';
@@ -4355,15 +4302,11 @@
         if (pendentesContainer) pendentesContainer.innerHTML = '';
 
         let pendentes = demandasDoUsuario.filter(d => {
-            const matchesSearch = !searchTerm || 
-                (d.nomeDemanda && d.nomeDemanda.toLowerCase().includes(searchTerm)) ||
-                (d.tag && d.tag.toLowerCase().includes(searchTerm));
-            
             const matchesStatus = statusFilter === 'todos' || d.status === statusFilter;
             
             const matchesDate = matchesDateFilter(d, monthFilter, yearFilter);
             
-            return matchesSearch && matchesStatus && matchesDate && (
+            return matchesStatus && matchesDate && (
                 d.status === 'pendente' || 
                 d.status === 'reprovada' || 
                 d.status === 'reprovada_pelo_atribuido' ||
@@ -4386,7 +4329,6 @@
     // Renderizar análise
     function renderizarAnalise() {
         const demandasDoUsuario = getDemandasParaUsuarioLogado();
-        const searchTerm = document.getElementById('analiseSearch')?.value.toLowerCase() || '';
         const statusFilter = document.getElementById('analiseFilter')?.value || 'todos';
         const monthFilter = document.getElementById('analiseMonthFilter')?.value || '';
         const yearFilter = document.getElementById('analiseYearFilter')?.value || '';
@@ -4396,15 +4338,11 @@
         if (analiseContainer) analiseContainer.innerHTML = '';
 
         let analise = demandasDoUsuario.filter(d => {
-            const matchesSearch = !searchTerm || 
-                (d.nomeDemanda && d.nomeDemanda.toLowerCase().includes(searchTerm)) ||
-                (d.tag && d.tag.toLowerCase().includes(searchTerm));
-            
             const matchesStatus = statusFilter === 'todos' || d.status === statusFilter;
             
             const matchesDate = matchesDateFilter(d, monthFilter, yearFilter);
             
-            return matchesSearch && matchesStatus && matchesDate && d.status === 'finalizado_pendente_aprovacao';
+            return matchesStatus && matchesDate && d.status === 'finalizado_pendente_aprovacao';
         });
         
         if (analiseContainer) {
@@ -4421,8 +4359,24 @@
 
     // Renderizar atrasadas
     function renderizarAtrasadas() {
-        const demandasDoUsuario = getDemandasParaUsuarioLogado();
-        const searchTerm = document.getElementById('atrasadasSearch')?.value.toLowerCase() || '';
+        // Se for gestor, mostrar todas as demandas atrasadas dos colaboradores
+        let demandasParaMostrar;
+        if (usuarioLogado && usuarioLogado.role === 'gestor') {
+            demandasParaMostrar = todasDemandas.filter(d => {
+                if (d.status === 'aprovada') return false;
+                const dataLimite = new Date(d.dataLimite);
+                const hoje = new Date();
+                return dataLimite < hoje;
+            });
+        } else {
+            demandasParaMostrar = getDemandasParaUsuarioLogado().filter(d => {
+                if (d.status === 'aprovada') return false;
+                const dataLimite = new Date(d.dataLimite);
+                const hoje = new Date();
+                return dataLimite < hoje;
+            });
+        }
+
         const monthFilter = document.getElementById('atrasadasMonthFilter')?.value || '';
         const yearFilter = document.getElementById('atrasadasYearFilter')?.value || '';
 
@@ -4430,17 +4384,9 @@
         
         if (atrasadasContainer) atrasadasContainer.innerHTML = '';
 
-        let atrasadas = demandasDoUsuario.filter(d => {
-            if (d.status === 'aprovada') return false;
-            const dataLimite = new Date(d.dataLimite);
-            const hoje = new Date();
-            const matchesSearch = !searchTerm || 
-                (d.nomeDemanda && d.nomeDemanda.toLowerCase().includes(searchTerm)) ||
-                (d.tag && d.tag.toLowerCase().includes(searchTerm));
-            
+        let atrasadas = demandasParaMostrar.filter(d => {
             const matchesDate = matchesDateFilter(d, monthFilter, yearFilter);
-            
-            return matchesSearch && matchesDate && dataLimite < hoje;
+            return matchesDate;
         });
         
         // Mostrar ações em lote se houver demandas atrasadas
@@ -4463,7 +4409,6 @@
     // Renderizar aprovadas
     function renderizarAprovadas() {
         const demandasDoUsuario = getDemandasParaUsuarioLogado();
-        const searchTerm = document.getElementById('aprovadasSearch')?.value.toLowerCase() || '';
         const monthFilter = document.getElementById('aprovadasMonthFilter')?.value || '';
         const yearFilter = document.getElementById('aprovadasYearFilter')?.value || '';
 
@@ -4472,13 +4417,9 @@
         if (aprovadasContainer) aprovadasContainer.innerHTML = '';
 
         let concluidas = demandasDoUsuario.filter(d => {
-            const matchesSearch = !searchTerm || 
-                (d.nomeDemanda && d.nomeDemanda.toLowerCase().includes(searchTerm)) ||
-                (d.tag && d.tag.toLowerCase().includes(searchTerm));
-            
             const matchesDate = matchesDateFilter(d, monthFilter, yearFilter);
             
-            return matchesSearch && matchesDate && d.status === 'aprovada';
+            return matchesDate && d.status === 'aprovada';
         });
         
         if (aprovadasContainer) {
@@ -4495,9 +4436,9 @@
     // Renderizar pendentes dos colaboradores
     function renderizarPendentesColaboradores() {
         const demandasColaboradores = getDemandasDosColaboradores();
-        const searchTerm = document.getElementById('colabSearch')?.value.toLowerCase() || '';
         const statusFilter = document.getElementById('colabFilter')?.value || 'todos';
         const funcFilter = document.getElementById('colabFuncFilter')?.value || 'todos';
+        const localFilter = document.getElementById('colabLocalFilter')?.value || 'todos';
         const monthFilter = document.getElementById('colabMonthFilter')?.value || '';
         const yearFilter = document.getElementById('colabYearFilter')?.value || '';
 
@@ -4506,15 +4447,12 @@
         if (colabContainer) colabContainer.innerHTML = '';
 
         let demandas = demandasColaboradores.filter(d => {
-            const matchesSearch = !searchTerm || 
-                (d.nomeDemanda && d.nomeDemanda.toLowerCase().includes(searchTerm)) ||
-                (d.tag && d.tag.toLowerCase().includes(searchTerm));
-            
             const matchesStatus = statusFilter === 'todos' || d.status === statusFilter;
             const matchesFunc = funcFilter === 'todos' || d.funcionarioId == funcFilter;
+            const matchesLocal = localFilter === 'todos' || d.local === localFilter;
             const matchesDate = matchesDateFilter(d, monthFilter, yearFilter);
             
-            return matchesSearch && matchesStatus && matchesFunc && matchesDate;
+            return matchesStatus && matchesFunc && matchesLocal && matchesDate;
         });
         
         if (colabContainer) {
@@ -5345,26 +5283,6 @@
     function inicializarImportacaoJSON() {
     }
 
-    // Inicializar notificações em tempo real
-    function inicializarNotificacoesTempoReal() {
-        setInterval(() => {
-            if (Math.random() > 0.9) {
-                const tipos = ['success', 'warning', 'info'];
-                const mensagens = [
-                    'Nova demanda concluída',
-                    'Demanda está próxima do prazo',
-                    'Funcionário disponível para nova tarefa',
-                    'Meta semanal alcançada'
-                ];
-                
-                const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-                const mensagem = mensagens[Math.floor(Math.random() * mensagens.length)];
-                
-                showNotification(tipo, 'Notificação do Sistema', mensagem);
-            }
-        }, 45000);
-    }
-
     // Verificar lembretes
     function verificarLembretes() {
         const reminderContainer = document.getElementById('reminderContainer');
@@ -5460,7 +5378,7 @@
                 <div class="card-header">
                     <h3><i class="fas fa-user"></i> ${funcionario.nome}</h3>
                     <div class="card-actions">
-                        <input type="checkbox" id="${checkboxId}" class="func-checkbox" onchange="toggleFuncionarioSelection(${funcionario.nome.replace(/'/g, "\\'")})">
+                        <input type="checkbox" id="${checkboxId}" class="func-checkbox" onchange="toggleFuncionarioSelection('${funcionario.nome.replace(/'/g, "\\'")}')">
                         <label for="${checkboxId}">Selecionar</label>
                     </div>
                 </div>
@@ -5877,6 +5795,18 @@
             return 0;
         });
 
+        // Adicionar nós para cada tipo de demanda
+        const tiposDemanda = [
+            { nome: 'Pendentes', filtro: d => d.status === 'pendente' || d.status === 'atribuida_pendente_aceitacao', cor: 'pending' },
+            { nome: 'Em Análise', filtro: d => d.status === 'finalizado_pendente_aprovacao', cor: 'in-analysis' },
+            { nome: 'Atrasadas', filtro: d => {
+                const dataLimite = new Date(d.dataLimite);
+                const hoje = new Date();
+                return dataLimite < hoje && d.status !== 'aprovada';
+            }, cor: 'overdue' },
+            { nome: 'Concluídas', filtro: d => d.status === 'aprovada', cor: 'completed' }
+        ];
+
         // Adicionar nó central
         const centralNode = document.createElement('div');
         centralNode.className = 'mindmap-node';
@@ -5886,75 +5816,128 @@
         centralNode.innerHTML = '<i class="fas fa-user"></i> Minhas Demandas';
         mindmapArea.appendChild(centralNode);
 
-        // Adicionar nós para cada demanda
-        demandas.forEach((demanda, index) => {
-            const node = document.createElement('div');
-            node.className = 'mindmap-node';
+        // Adicionar nós para cada tipo de demanda
+        tiposDemanda.forEach((tipo, index) => {
+            const demandasTipo = demandas.filter(tipo.filtro);
             
-            // Definir cor com base no status
-            if (demanda.status === 'pendente') {
-                node.classList.add('pending');
-            } else if (demanda.status === 'finalizado_pendente_aprovacao') {
-                node.classList.add('in-analysis');
-            } else if (demanda.status === 'aprovada') {
-                node.classList.add('completed');
-            }
+            if (demandasTipo.length === 0) return;
+            
+            // Adicionar nó do tipo
+            const tipoNode = document.createElement('div');
+            tipoNode.className = `mindmap-node ${tipo.cor}`;
             
             // Posicionar em círculo ao redor do nó central
-            const angleCircle = (index / demandas.length) * 2 * Math.PI;
-            const radius = 25; // Reduzido de 30% para 25%
+            const angleCircle = (index / tiposDemanda.length) * 2 * Math.PI;
+            const radius = 15; // Reduzido de 30% para 15%
             
             // Calcular posição em porcentagem
             const x = 50 + radius * Math.cos(angleCircle);
             const y = 50 + radius * Math.sin(angleCircle);
             
-            node.style.left = `${x}%`;
-            node.style.top = `${y}%`;
-            node.style.transform = 'translate(-50%, -50%)'; // Centralizar o nó
-            node.innerHTML = `<strong>${demanda.nomeDemanda || demanda.descricao}</strong><br><small>${demanda.prioridade}</small>`;
+            tipoNode.style.left = `${x}%`;
+            tipoNode.style.top = `${y}%`;
+            tipoNode.style.transform = 'translate(-50%, -50%)'; // Centralizar o nó
+            tipoNode.innerHTML = `<strong>${tipo.nome}</strong><br><small>${demandasTipo.length} demandas</small>`;
             
-            // Adicionar evento de clique para ver detalhes
-            node.addEventListener('click', () => verDetalhes(demanda.id));
+            // Adicionar evento de clique para filtrar
+            tipoNode.addEventListener('click', () => {
+                document.getElementById('mindmapFilter').value = 
+                    tipo.nome === 'Pendentes' ? 'pendente' :
+                    tipo.nome === 'Em Análise' ? 'finalizado_pendente_aprovacao' :
+                    tipo.nome === 'Atrasadas' ? 'atrasado' :
+                    tipo.nome === 'Concluídas' ? 'aprovada' : 'todos';
+                atualizarMindmap();
+            });
             
             // Adicionar evento de mouseover para mostrar tooltip
-            node.addEventListener('mouseenter', (e) => showTooltip(e, demanda));
-            node.addEventListener('mouseleave', hideTooltip);
+            tipoNode.addEventListener('mouseenter', (e) => {
+                const tooltip = document.getElementById('tooltip');
+                if (tooltip) {
+                    tooltip.innerHTML = `<strong>${tipo.nome}</strong><br>${demandasTipo.length} demandas`;
+                    tooltip.style.left = e.pageX + 10 + 'px';
+                    tooltip.style.top = e.pageY + 10 + 'px';
+                    tooltip.classList.add('show');
+                }
+            });
+            
+            tipoNode.addEventListener('mouseleave', () => {
+                const tooltip = document.getElementById('tooltip');
+                if (tooltip) {
+                    tooltip.classList.remove('show');
+                }
+            });
             
             // Tornar arrastável
-            makeDraggable(node);
+            makeDraggable(tipoNode);
             
-            // Adicionar ID ao nó para referência
-            node.id = `node-${demanda.id}`;
+            mindmapArea.appendChild(tipoNode);
             
-            mindmapArea.appendChild(node);
+            // Adicionar nós para cada demanda do tipo
+            demandasTipo.forEach((demanda, idx) => {
+                const node = document.createElement('div');
+                node.className = `mindmap-node ${tipo.cor}`;
+                
+                // Posicionar em círculo ao redor do nó do tipo
+                const angleDemanda = (idx / demandasTipo.length) * 2 * Math.PI;
+                const radiusDemanda = 10; // Reduzido de 30% para 10%
+                
+                // Calcular posição em porcentagem
+                const xDemanda = x + radiusDemanda * Math.cos(angleDemanda);
+                const yDemanda = y + radiusDemanda * Math.sin(angleDemanda);
+                
+                node.style.left = `${xDemanda}%`;
+                node.style.top = `${yDemanda}%`;
+                node.style.transform = 'translate(-50%, -50%)'; // Centralizar o nó
+                node.innerHTML = `<strong>${demanda.nomeDemanda || demanda.descricao}</strong><br><small>${demanda.prioridade}</small>`;
+                
+                // Adicionar evento de clique para ver detalhes
+                node.addEventListener('click', () => verDetalhes(demanda.id));
+                
+                // Adicionar evento de mouseover para mostrar tooltip
+                node.addEventListener('mouseenter', (e) => showTooltip(e, demanda));
+                node.addEventListener('mouseleave', hideTooltip);
+                
+                // Tornar arrastável
+                makeDraggable(node);
+                
+                // Adicionar ID ao nó para referência
+                node.id = `node-${demanda.id}`;
+                
+                mindmapArea.appendChild(node);
+            });
         });
 
         // Adicionar linhas de conexão após todos os nós serem criados
         setTimeout(() => {
-            demandas.forEach((demanda, index) => {
-                const connection = document.createElement('div');
-                connection.className = 'mindmap-connection';
+            // Conectar o nó central aos nós de tipo
+            tiposDemanda.forEach((tipo, index) => {
+                const demandasTipo = demandas.filter(tipo.filtro);
                 
-                // Obter elementos
-                const centralNode = document.querySelector('.mindmap-node:not(.pending):not(.in-analysis):not(.completed)');
-                const node = document.getElementById(`node-${demanda.id}`);
+                if (demandasTipo.length === 0) return;
                 
-                if (!centralNode || !node) return;
+                const tipoNode = document.querySelector(`.mindmap-node.${tipo.cor}`);
+                const centralNode = document.querySelector('.mindmap-node:not(.pending):not(.in-analysis):not(.completed):not(.overdue)');
+                
+                if (!centralNode || !tipoNode) return;
                 
                 // Calcular posição e rotação da linha
                 const centralRect = centralNode.getBoundingClientRect();
-                const nodeRect = node.getBoundingClientRect();
+                const tipoRect = tipoNode.getBoundingClientRect();
                 const mindmapRect = mindmapArea.getBoundingClientRect();
                 
                 // Calcular pontos de conexão (centro dos elementos)
                 const x1 = centralRect.left + centralRect.width / 2 - mindmapRect.left;
                 const y1 = centralRect.top + centralRect.height / 2 - mindmapRect.top;
-                const x2 = nodeRect.left + nodeRect.width / 2 - mindmapRect.left;
-                const y2 = nodeRect.top + nodeRect.height / 2 - mindmapRect.top;
+                const x2 = tipoRect.left + tipoRect.width / 2 - mindmapRect.left;
+                const y2 = tipoRect.top + tipoRect.height / 2 - mindmapRect.top;
                 
                 // Calcular comprimento e ângulo da linha
                 const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 const connectionAngle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                // Criar elemento de linha
+                const connection = document.createElement('div');
+                connection.className = 'mindmap-connection';
                 
                 // Aplicar estilos à linha
                 connection.style.width = `${length}px`;
@@ -5965,6 +5948,39 @@
                 connection.style.transformOrigin = '0 0'; // Ponto de rotação no início da linha
                 
                 mindmapArea.appendChild(connection);
+                
+                // Conectar o nó de tipo aos nós de demanda
+                demandasTipo.forEach((demanda, idx) => {
+                    const node = document.getElementById(`node-${demanda.id}`);
+                    if (!node) return;
+                    
+                    // Calcular posição e rotação da linha
+                    const nodeRect = node.getBoundingClientRect();
+                    
+                    // Calcular pontos de conexão (centro dos elementos)
+                    const x1Node = tipoRect.left + tipoRect.width / 2 - mindmapRect.left;
+                    const y1Node = tipoRect.top + tipoRect.height / 2 - mindmapRect.top;
+                    const x2Node = nodeRect.left + nodeRect.width / 2 - mindmapRect.left;
+                    const y2Node = nodeRect.top + nodeRect.height / 2 - mindmapRect.top;
+                    
+                    // Calcular comprimento e ângulo da linha
+                    const lengthNode = Math.sqrt(Math.pow(x2Node - x1Node, 2) + Math.pow(y2Node - y1Node, 2));
+                    const connectionAngleNode = Math.atan2(y2Node - y1Node, x2Node - x1Node) * 180 / Math.PI;
+                    
+                    // Criar elemento de linha
+                    const connectionNode = document.createElement('div');
+                    connectionNode.className = 'mindmap-connection';
+                    
+                    // Aplicar estilos à linha
+                    connectionNode.style.width = `${lengthNode}px`;
+                    connectionNode.style.height = '1px';
+                    connectionNode.style.left = `${x1Node}px`;
+                    connectionNode.style.top = `${y1Node}px`;
+                    connectionNode.style.transform = `rotate(${connectionAngleNode}deg)`;
+                    connectionNode.style.transformOrigin = '0 0'; // Ponto de rotação no início da linha
+                    
+                    mindmapArea.appendChild(connectionNode);
+                });
             });
         }, 100); // Pequeno atraso para garantir que os elementos estejam renderizados
     }
@@ -6238,15 +6254,31 @@
             
             let audioContent = '';
             if (note.audioData) {
-                audioContent = `
-                    <div class="audio-note">
-                        <p><i class="fas fa-microphone"></i> Nota de Áudio</p>
-                        <audio controls class="audio-player">
-                            <source src="${note.audioData}" type="audio/wav">
-                            Seu navegador não suporta áudio.
-                        </audio>
-                    </div>
-                `;
+                // Para garantir que o áudio funcione mesmo após logout/login
+                // Vamos verificar se é uma URL de blob ou dados base64
+                let audioSrc = note.audioData;
+                
+                // Se for uma URL de blob, vamos converter para base64 para persistência
+                if (audioSrc.startsWith('blob:')) {
+                    // Isso indica que é um blob temporário que não funcionará após recarregar a página
+                    // Para este exemplo, vamos apenas mostrar uma mensagem
+                    audioContent = `
+                        <div class="audio-note">
+                            <p><i class="fas fa-microphone"></i> Nota de Áudio (não disponível após logout)</p>
+                        </div>
+                    `;
+                } else {
+                    // Se for dados base64 ou uma URL válida, podemos usar diretamente
+                    audioContent = `
+                        <div class="audio-note">
+                            <p><i class="fas fa-microphone"></i> Nota de Áudio</p>
+                            <audio controls class="audio-player">
+                                <source src="${audioSrc}" type="audio/wav">
+                                Seu navegador não suporta áudio.
+                            </audio>
+                        </div>
+                    `;
+                }
             }
             
             noteElement.innerHTML = `
@@ -6780,15 +6812,6 @@
             document.body.removeChild(a);
             showNotification('success', 'Gráfico Baixado', `O gráfico de ${chartType} foi baixado.`);
         }
-    }
-
-    // Função para atualizar automaticamente após alterações
-    function atualizarAposAlteracao() {
-        // Pequeno delay para garantir que os dados foram salvos
-        setTimeout(() => {
-            atualizarInterface();
-            showNotification('success', 'Atualizado', 'A interface foi atualizada automaticamente.');
-        }, 500);
     }
 </script>
 
